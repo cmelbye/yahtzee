@@ -6,10 +6,21 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		86B6AECF16DB016F00453FB5 /* checkit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = checkit.h; sourceTree = "<group>"; };
+		86B6AED016DB016F00453FB5 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		86B6AED116DB019B00453FB5 /* yahtzee.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = yahtzee.c; sourceTree = "<group>"; };
+		86B6AED216DB01A400453FB5 /* yahtzee.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = yahtzee.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		86B6AEC416DB014500453FB5 = {
 			isa = PBXGroup;
 			children = (
+				86B6AED116DB019B00453FB5 /* yahtzee.c */,
+				86B6AED216DB01A400453FB5 /* yahtzee.h */,
+				86B6AECF16DB016F00453FB5 /* checkit.h */,
+				86B6AED016DB016F00453FB5 /* Makefile */,
 			);
 			sourceTree = "<group>";
 		};
