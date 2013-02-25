@@ -7,9 +7,18 @@
 
 int main(void)
 {
+    int turn;
+    int round;
+    int numberOfPlayers = 0;
+    int currentDiceRoll = 0;
+    int currentPlayer = 0;
+    int selectResult;
+    
     dice_t gameDice[5];
     play_t playerOneScores[12];
     play_t playerTwoScores[12];
+    
+    int playerOneScore, playerTwoScore;
     
     srand((unsigned int) time(0));
 
@@ -17,13 +26,111 @@ int main(void)
     test_cases();
 #endif
     
-    initDice(gameDice);
-    initScores(playerOneScores);
-    initScores(playerTwoScores);
+    clearScreen();
     
-    throwDice(gameDice, CHEAT);
-    printDice(gameDice);
-    printScoreCard(playerOneScores);
+    printf("\n\n");
+    printf(BANNER);
+    printf("\n\n");
+    
+    while(numberOfPlayers != 1 && numberOfPlayers != 2)
+    {
+        printf("   How many players? ");
+        
+        scanf("%d", &numberOfPlayers);
+        getchar();
+        
+        if(numberOfPlayers != 1 && numberOfPlayers != 2)
+        {
+            printf("   Either one or two players can play, try again.\n\n");
+        }
+    }
+    
+    initScores(playerOneScores);
+    
+    if(numberOfPlayers == 2)
+    {
+        initScores(playerTwoScores);
+    }
+    
+    for(round = 0; round < 12; round++)
+    {
+        currentPlayer = PLAYER_1;
+        
+        for(turn = 0; turn < numberOfPlayers; turn++)
+        {
+            initDice(gameDice);
+            
+            clearScreen();
+            
+            for(currentDiceRoll = 0; currentDiceRoll < 3; currentDiceRoll++)
+            {
+                throwDice(gameDice, CHEAT);
+                
+                if(currentDiceRoll != 2)
+                {
+                    if(currentPlayer == PLAYER_1)
+                    {
+                        selectResult = selectDice(gameDice, playerOneScores,
+                                                  currentDiceRoll,
+                                                  currentPlayer,
+                                                  numberOfPlayers);
+                    }
+                    else
+                    {
+                        selectResult = selectDice(gameDice, playerTwoScores,
+                                                  currentDiceRoll,
+                                                  currentPlayer,
+                                                  numberOfPlayers);
+                    }
+                    
+                    clearScreen();
+                    
+                    if(selectResult == -1)
+                    {
+                        break;
+                    }
+                }
+            }
+            
+            if(currentPlayer == PLAYER_1)
+            {
+                choosePlay(gameDice, playerOneScores);
+                currentPlayer = PLAYER_2;
+            }
+            else
+            {
+                choosePlay(gameDice, playerTwoScores);
+            }
+        }
+    }
+    
+    printf("\nGame over!\n");
+    
+    if(numberOfPlayers == 1)
+    {
+        printf("Your score was %d.\n", calcScore(playerOneScores));
+    }
+    else
+    {
+        playerOneScore = calcScore(playerOneScores);
+        playerTwoScore = calcScore(playerTwoScores);
+        
+        printf("Player 1 score: %d\n", playerOneScore);
+        printf("Player 2 score: %d\n\n", playerTwoScore);
+        
+        if(playerOneScore == playerTwoScore)
+        {
+            printf("It's a tie!\n");
+        }
+        else if(playerOneScore > playerTwoScore)
+        {
+            printf("Player 1 wins!\n");
+        }
+        else
+        {
+            printf("Player 2 wins!\n");
+        }
+    }
     
     return 0;
 }
@@ -49,11 +156,15 @@ int calcLargeStraight(dice_t dice[5])
     int i;
     int pointsEarned = 40;
     
-    sortDice(dice);
+    dice_t sortedDice[5];
+    
+    memcpy(sortedDice, dice, sizeof(sortedDice));
+    
+    sortDice(sortedDice);
     
     for(i = 1; i < 5; i++)
     {
-        if(dice[i].value != (dice[i - 1].value + 1))
+        if(sortedDice[i].value != (sortedDice[i - 1].value + 1))
         {
             pointsEarned = 0;
             break;
@@ -70,15 +181,19 @@ int calcSmallStraight(dice_t dice[5])
     int totalNonIncrements = 0;
     int currentStreak = 1;
     
-    sortDice(dice);
+    dice_t sortedDice[5];
+    
+    memcpy(sortedDice, dice, sizeof(sortedDice));
+    
+    sortDice(sortedDice);
     
     for(i = 1; i < 5; i++)
     {
-        if(dice[i].value != dice[i - 1].value)
+        if(sortedDice[i].value != sortedDice[i - 1].value)
         {
-            if(dice[i].value != (dice[i - 1].value + 1))
+            if(sortedDice[i].value != (sortedDice[i - 1].value + 1))
             {
-                currentStreak = 0;
+                currentStreak = 1;
                 totalNonIncrements++;
                 
                 if(totalNonIncrements > 1)
@@ -166,6 +281,100 @@ int calcChance(dice_t dice[5])
     return totalPoints;
 }
 
+void choosePlay(dice_t dice[5], play_t scores[12])
+{
+    int playChoice = 0;
+    
+    printf("FINAL ROLL\n");
+    printDice(dice);
+    
+    printScoreCard(dice, scores);
+    
+    while((playChoice < 1) || (playChoice > 12))
+    {
+        printf("Choice: ");
+        scanf("%d", &playChoice);
+        getchar();
+        
+        if((playChoice < 1) || (playChoice > 12))
+        {
+            printf("That's not a valid choice, try again.\n");
+        }
+        else if(updatePlay(dice, scores, (playChoice - 1)) == -1)
+        {
+            printf("You already have a score for that play, try again.\n");
+            playChoice = 0;
+        }
+    }
+}
+
+int updatePlay(dice_t dice[5], play_t scores[12], int playIndex)
+{
+    int points = 0;
+    
+    if(scores[playIndex].completed)
+    {
+        return -1;
+    }
+    
+    points = calcPointsForPlayIndex(dice, playIndex);
+    
+    scores[playIndex].points = points;
+    scores[playIndex].completed = 1;
+    
+    return 0;
+}
+
+int calcPointsForPlayIndex(dice_t dice[5], int playIndex)
+{
+    int points = 0;
+    
+    switch (playIndex) {
+        case 0: /* Aces */
+            points = calcUpper(dice, 1);
+            break;
+        case 1: /* Twos */
+            points = calcUpper(dice, 2);
+            break;
+        case 2: /* Threes */
+            points = calcUpper(dice, 3);
+            break;
+        case 3: /* Fours */
+            points = calcUpper(dice, 4);
+            break;
+        case 4: /* Fives */
+            points = calcUpper(dice, 5);
+            break;
+        case 5: /* Sixes */
+            points = calcUpper(dice, 6);
+            break;
+        case 6: /* Small Straight */
+            points = calcSmallStraight(dice);
+            break;
+        case 7: /* Large Straight */
+            points = calcLargeStraight(dice);
+            break;
+        case 8: /* All Evens */
+            points = calcEvens(dice);
+            break;
+        case 9: /* All Odds */
+            points = calcOdds(dice);
+            break;
+        case 10: /* Yahtzee */
+            points = calcYahtzee(dice);
+            break;
+        case 11: /* Chance */
+            points = calcChance(dice);
+            break;
+        default:
+            printf("ERROR: Invalid playIndex in updatePlay().\n");
+            exit(1);
+            break;
+    }
+    
+    return points;
+}
+
 void sortDice(dice_t dice[5])
 {
     int c, d, position;
@@ -240,9 +449,133 @@ void throwDice(dice_t dice[5], int cheat)
     }
 }
 
-void printScoreCard(play_t scores[12])
+int selectDice(dice_t dice[5], play_t scores[12], int rollNumber, int player,
+               int numberOfPlayers)
+{
+    char diceInput[80];
+    int index = 0;
+    int doneWithInput = 0;
+    int outputValue = 0;
+    
+    while(!doneWithInput)
+    {
+        index = 0;
+        
+        if(numberOfPlayers == 2)
+        {
+            if(player == PLAYER_1)
+            {
+                printf("PLAYER 1, ");
+            }
+            else
+            {
+                printf("PLAYER 2, ");
+            }
+        }
+        
+        printf("ROLL #%d\n", (rollNumber + 1));
+        printDice(dice);
+        
+        printf("Choose dice, specified by their letters, to toggle between held and not held.\n");
+        printf("Multiple dice can be chosen at once by typing multiple letters without spaces.\n");
+        printf("Type 's' to see your score card.\n");
+        printf("Type 'q' if you DON'T need to roll again and want to pick your score.\n");
+        printf("Type 'r' to roll the dice again.\n");
+        printf("Choice: ");
+        
+        fgets(diceInput, 80, stdin);
+        diceInput[strlen(diceInput)-1] = '\0';
+        
+        while(diceInput[index] != '\0')
+        {
+            switch (diceInput[index]) {
+                case 'q':
+                    doneWithInput = 1;
+                    outputValue = -1;
+                    break;
+                case 'r':
+                    doneWithInput = 1;
+                    break;
+                case 's':
+                    clearScreen();
+                    printScoreCard(dice, scores);
+                    printf("\n\n(press ENTER to continue)\n");
+                    getchar();
+                    clearScreen();
+                    break;
+                case 'a':
+                    toggleHold(dice, 0);
+                    break;
+                case 'b':
+                    toggleHold(dice, 1);
+                    break;
+                case 'c':
+                    toggleHold(dice, 2);
+                    break;
+                case 'd':
+                    toggleHold(dice, 3);
+                    break;
+                case 'e':
+                    toggleHold(dice, 4);
+                    break;
+                default:
+                    break;
+            }
+            
+            index++;
+        }
+        
+        if(!doneWithInput)
+        {
+            printf("\n");
+        }
+    }
+    
+    return outputValue;
+}
+
+void toggleHold(dice_t dice[5], int diceIndex)
+{
+    if(dice[diceIndex].hold == 1)
+    {
+        dice[diceIndex].hold = 0;
+    }
+    else
+    {
+        dice[diceIndex].hold = 1;
+    }
+}
+
+void holdAllDice(dice_t dice[5])
+{
+    int i;
+    
+    for(i = 0; i < 5; i++)
+    {
+        dice[i].hold = 1;
+    }
+}
+
+int allDiceAreHeld(dice_t dice[5])
+{
+    int i;
+    
+    for(i = 0; i < 5; i++)
+    {
+        if(dice[i].hold == 0)
+        {
+            return 0;
+        }
+    }
+    
+    return 1;
+}
+
+void printScoreCard(dice_t dice[5], play_t scores[12])
 {
     int i, rowNumber;
+    
+    printf("SCORE CARD\n\n");
     
     for(i = 0; i < 12; i++)
     {
@@ -265,7 +598,8 @@ void printScoreCard(play_t scores[12])
         }
         else
         {
-            printf("(not used)\n");
+            printf("(not used, potential points: %d)\n",
+                   calcPointsForPlayIndex(dice, i));
         }
     }
 }
@@ -274,14 +608,68 @@ void printDice(dice_t dice[5])
 {
     int i;
     
-    printf(" ---   ---   ---   ---   --- \n");
+    printf("\n");
+    printf(" ");
     
     for(i = 0; i < 5; i++)
     {
-        printf("| %d | ", dice[i].value);
+        if(dice[i].hold)
+        {
+            printf("\33[31m---\33[m   ");
+        }
+        else
+        {
+            printf("---   ");
+        }
     }
     
-    printf("\n ---   ---   ---   ---   --- \n");
+    printf("\n");
+    
+    for(i = 0; i < 5; i++)
+    {
+        if(dice[i].hold)
+        {
+            printf("\33[31m|\33[m %d \33[31m|\33[m ", dice[i].value);
+        }
+        else
+        {
+            printf("| %d | ", dice[i].value);
+        }
+    }
+    
+    printf("\n");
+    
+    printf(" ");
+    
+    for(i = 0; i < 5; i++)
+    {
+        if(dice[i].hold)
+        {
+            printf("\33[31m---\33[m   ");
+        }
+        else
+        {
+            printf("---   ");
+        }
+    }
+    
+    printf("\n");
+    
+    printf("  ");
+    
+    for(i = 0; i < 5; i++)
+    {
+        if(dice[i].hold)
+        {
+            printf("\33[31m%c\33[m     ", (97 + i));
+        }
+        else
+        {
+            printf("%c     ", (97 + i));
+        }
+    }
+    
+    printf("\n\n");
 }
 
 /*
@@ -326,6 +714,19 @@ void initScores(play_t scores[12])
     }
 }
 
+int calcScore(play_t scores[12])
+{
+    int i = 0;
+    int score = 0;
+    
+    for(i = 0; i < 12; i++)
+    {
+        score += scores[i].points;
+    }
+    
+    return score;
+}
+
 dice_t makeDice(int value, int hold)
 {
     dice_t newDice;
@@ -366,6 +767,11 @@ play_t makePlay(const char *type, int points, int completed)
     newPlay.completed = completed;
     
     return newPlay;
+}
+
+void clearScreen(void)
+{
+    printf("\033[2J\033[1;1H");
 }
 
 void test_cases(void)
@@ -414,22 +820,22 @@ void test_cases(void)
     
     checkit_section("calcSmallStraight");
     
-    makeFiveDice(dice, 1, 2, 3, 4, 3);
+    makeFiveDice(dice, 2, 3, 1, 5, 4); /* test sorting */
+    checkit_int(calcSmallStraight(dice), 30);
+    
+    makeFiveDice(dice, 1, 2, 3, 3, 4);
     checkit_int(calcSmallStraight(dice), 30);
     
     makeFiveDice(dice, 1, 2, 3, 4, 6);
     checkit_int(calcSmallStraight(dice), 30);
     
-    makeFiveDice(dice, 2, 3, 1, 5, 4);
+    makeFiveDice(dice, 2, 3, 4, 5, 5);
     checkit_int(calcSmallStraight(dice), 30);
     
-    makeFiveDice(dice, 5, 2, 3, 4, 5);
+    makeFiveDice(dice, 2, 3, 4, 5, 6);
     checkit_int(calcSmallStraight(dice), 30);
     
-    makeFiveDice(dice, 6, 2, 3, 4, 5);
-    checkit_int(calcSmallStraight(dice), 30);
-    
-    makeFiveDice(dice, 2, 3, 4, 5, 4);
+    makeFiveDice(dice, 2, 3, 4, 4, 5);
     checkit_int(calcSmallStraight(dice), 30);
     
     makeFiveDice(dice, 1, 2, 2, 3, 6);
@@ -445,6 +851,12 @@ void test_cases(void)
     checkit_int(calcSmallStraight(dice), 30);
     
     makeFiveDice(dice, 2, 3, 4, 4, 5);
+    checkit_int(calcSmallStraight(dice), 30);
+    
+    makeFiveDice(dice, 1, 3, 4, 5, 6);
+    checkit_int(calcSmallStraight(dice), 30);
+    
+    makeFiveDice(dice, 2, 2, 3, 4, 5);
     checkit_int(calcSmallStraight(dice), 30);
     
     /* calcEvens */
