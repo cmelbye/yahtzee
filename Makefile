@@ -1,17 +1,18 @@
-MAIN=yahtzee
-CFLAGS=-ansi -Wall -pedantic -lm
+CC=gcc
+CFLAGS=-ansi -Wall -pedantic -MMD
+LDFLAGS=-lm
 
-all: debug run
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:%.c=%.o)
 
-debug : ${MAIN}_debug
-run : ${MAIN}_run
+all: yahtzee
 
-${MAIN}_debug : ${MAIN}.c checkit.h
-	gcc -o ${MAIN}_debug ${CFLAGS} ${MAIN}.c
+yahtzee: $(OBJS)
 
-${MAIN}_run : ${MAIN}.c checkit.h
-	gcc -o ${MAIN}_run -DNCHECKIT ${CFLAGS} ${MAIN}.c
+clean:
+	$(RM) *.o *.d yahtzee
 
-clean :
-	\rm ${MAIN}_debug ${MAIN}_run
+.PHONY: all clean
+
+-include *.d
 
