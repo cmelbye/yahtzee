@@ -1,3 +1,5 @@
+#define CHEAT 0
+
 typedef struct dice_s {
     int value;
     int hold;

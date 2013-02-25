@@ -21,7 +21,7 @@ int main(void)
     initScores(playerOneScores);
     initScores(playerTwoScores);
     
-    throwDice(gameDice, 0);
+    throwDice(gameDice, CHEAT);
     printDice(gameDice);
     printScoreCard(playerOneScores);
     
@@ -51,13 +51,9 @@ int calcLargeStraight(dice_t dice[5])
     
     sortDice(dice);
     
-    for(i = 0; i < 5; i++)
+    for(i = 1; i < 5; i++)
     {
-        if(i == 0)
-        {
-            continue;
-        }
-        else if(dice[i].value != (dice[i - 1].value + 1))
+        if(dice[i].value != (dice[i - 1].value + 1))
         {
             pointsEarned = 0;
             break;
@@ -76,13 +72,9 @@ int calcSmallStraight(dice_t dice[5])
     
     sortDice(dice);
     
-    for(i = 0; i < 5; i++)
+    for(i = 1; i < 5; i++)
     {
-        if(i == 0)
-        {
-            continue;
-        }
-        else if(dice[i].value != dice[i - 1].value)
+        if(dice[i].value != dice[i - 1].value)
         {
             if(dice[i].value != (dice[i - 1].value + 1))
             {
@@ -148,15 +140,10 @@ int calcYahtzee(dice_t dice[5])
 {
     int i;
     int pointsEarned = 50;
-    int valueToCompare;
     
-    for(i = 0; i < 5; i++)
+    for(i = 1; i < 5; i++)
     {
-        if(i == 0)
-        {
-            valueToCompare = dice[i].value;
-        }
-        else if(dice[i].value != valueToCompare)
+        if(dice[i].value != dice[0].value)
         {
             pointsEarned = 0;
             break;
@@ -208,11 +195,48 @@ void sortDice(dice_t dice[5])
 void throwDice(dice_t dice[5], int cheat)
 {
     int i;
+    int dice1, dice2, dice3, dice4, dice5;
+    int goodInput = 0;
     
-    for(i = 0; i < 5; i++)
+    if(cheat)
     {
-        dice[i].value = (rand() % 6) + 1;
-        dice[i].hold = 0;
+        while(!goodInput)
+        {
+            printf("(CHEAT) Enter five dice values separated by spaces: ");
+            
+            scanf("%d %d %d %d %d",
+                  &dice1,
+                  &dice2,
+                  &dice3,
+                  &dice4,
+                  &dice5);
+            getchar();
+            
+            if((dice1 >= 1) && (dice1 <= 6) &&
+               (dice2 >= 1) && (dice2 <= 6) &&
+               (dice3 >= 1) && (dice3 <= 6) &&
+               (dice4 >= 1) && (dice4 <= 6) &&
+               (dice5 >= 1) && (dice5 <= 6))
+            {
+                goodInput = 1;
+            }
+            else
+            {
+                printf("Invalid input, try again...\n");
+            }
+        }
+        
+        makeFiveDice(dice, dice1, dice2, dice3, dice4, dice5);
+    }
+    else
+    {
+        for(i = 0; i < 5; i++)
+        {
+            if(!dice[i].hold)
+            {
+                dice[i].value = (rand() % 6) + 1;
+            }
+        }
     }
 }
 
@@ -260,6 +284,13 @@ void printDice(dice_t dice[5])
     printf("\n ---   ---   ---   ---   --- \n");
 }
 
+/*
+ * Initializes the dice array with five brand-new dice with the hold flag on
+ * each set to 0.
+ *
+ * WARNING: Dice values for the new dice will initially be set in sequential
+ * order (1, 2, 3, 4, 5) as a placeholder. Use throwDice() to randomize values.
+ */
 void initDice(dice_t dice[5])
 {
     int i;
@@ -308,15 +339,20 @@ dice_t makeDice(int value, int hold)
 /*
  * This function is used in tests to build mock dice rolls to test score
  * calculation functions.
+ *
+ * It's also used to modify the entire dice array at once to facilitate
+ * "cheating".
+ *
+ * WARNING: This function sets the hold flag of all dice to 1.
  */
 void makeFiveDice(dice_t dice[5], int value1, int value2, int value3,
                   int value4, int value5)
 {
-    dice[0] = makeDice(value1, 0);
-    dice[1] = makeDice(value2, 0);
-    dice[2] = makeDice(value3, 0);
-    dice[3] = makeDice(value4, 0);
-    dice[4] = makeDice(value5, 0);
+    dice[0] = makeDice(value1, 1);
+    dice[1] = makeDice(value2, 1);
+    dice[2] = makeDice(value3, 1);
+    dice[3] = makeDice(value4, 1);
+    dice[4] = makeDice(value5, 1);
 }
 
 play_t makePlay(const char *type, int points, int completed)
@@ -477,5 +513,8 @@ void test_cases(void)
     
     makeFiveDice(dice, 5, 5, 5, 5, 5);
     checkit_int(calcChance(dice), 25);
+    
+    printf("\n");
+    exit(1);
 }
 
