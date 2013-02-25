@@ -16,3 +16,5 @@ profile
 *.moved-aside
 DerivedData
 .idea/
+yahtzee_run
+yahtzee_debug
