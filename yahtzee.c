@@ -104,6 +104,10 @@ int main(void)
         }
     }
     
+    clearScreen();
+    
+    printDualScoreCard(playerOneScores, playerTwoScores, numberOfPlayers);
+    
     printf("\nGame over!\n");
     
     if(numberOfPlayers == 1)
@@ -501,7 +505,6 @@ int selectDice(dice_t dice[5], play_t scores[12], int rollNumber, int player,
                     printScoreCard(dice, scores);
                     printf("\n\n(press ENTER to continue)\n");
                     getchar();
-                    clearScreen();
                     break;
                 case 'a':
                     toggleHold(dice, 0);
@@ -527,7 +530,7 @@ int selectDice(dice_t dice[5], play_t scores[12], int rollNumber, int player,
         
         if(!doneWithInput)
         {
-            printf("\n");
+            clearScreen();
         }
     }
     
@@ -604,54 +607,77 @@ void printScoreCard(dice_t dice[5], play_t scores[12])
     }
 }
 
+void printDualScoreCard(play_t playerOneScores[12], play_t playerTwoScores[12],
+                        int numberOfPlayers)
+{
+    int i, rowNumber, scoreCard;
+    
+    if(numberOfPlayers == 2)
+    {
+        printf("  PLAYER 1");
+        printf("                                    ");
+        printf("PLAYER 2\n\n");
+    }
+    else
+    {
+        printf(" FINAL SCORE CARD\n");
+    }
+    
+    for(i = 0; i < 12; i++)
+    {
+        rowNumber = i + 1;
+        
+        printf(" ");
+        
+        for(scoreCard = 0; scoreCard < numberOfPlayers; scoreCard++)
+        {
+            if(rowNumber < 10)
+            {
+                printf(" %d. ", rowNumber);
+            }
+            else
+            {
+                printf("%d. ", rowNumber);
+            }
+            
+            if(scoreCard == 0)
+            {
+                printf("%-20s", playerOneScores[i].type);
+                
+                if(playerOneScores[i].points < 10)
+                {
+                    printf(" ");
+                }
+                
+                printf("%d points", playerOneScores[i].points);
+            }
+            else
+            {
+                printf("%-20s", playerTwoScores[i].type);
+                
+                if(playerTwoScores[i].points < 10)
+                {
+                    printf(" ");
+                }
+                
+                printf("%d points", playerTwoScores[i].points);
+            }
+            
+            if(scoreCard == 0)
+            {
+                printf("           ");
+            }
+        }
+        
+        printf("\n");
+    }
+    
+    printf("\n");
+}
+
 void printDice(dice_t dice[5])
 {
     int i;
-    
-    printf("\n");
-    printf(" ");
-    
-    for(i = 0; i < 5; i++)
-    {
-        if(dice[i].hold)
-        {
-            printf("\33[31m---\33[m   ");
-        }
-        else
-        {
-            printf("---   ");
-        }
-    }
-    
-    printf("\n");
-    
-    for(i = 0; i < 5; i++)
-    {
-        if(dice[i].hold)
-        {
-            printf("\33[31m|\33[m %d \33[31m|\33[m ", dice[i].value);
-        }
-        else
-        {
-            printf("| %d | ", dice[i].value);
-        }
-    }
-    
-    printf("\n");
-    
-    printf(" ");
-    
-    for(i = 0; i < 5; i++)
-    {
-        if(dice[i].hold)
-        {
-            printf("\33[31m---\33[m   ");
-        }
-        else
-        {
-            printf("---   ");
-        }
-    }
     
     printf("\n");
     
@@ -661,12 +687,150 @@ void printDice(dice_t dice[5])
     {
         if(dice[i].hold)
         {
-            printf("\33[31m%c\33[m     ", (97 + i));
+            printf("\33[31m");
         }
-        else
+        
+        printf("-------    ");
+        
+        if(dice[i].hold)
         {
-            printf("%c     ", (97 + i));
+            printf("\33[m");
         }
+    }
+    
+    printf("\n");
+    
+    for(i = 0; i < 5; i++)
+    {
+        printf(" ");
+        
+        if(dice[i].hold)
+        {
+            printf("\33[31m");
+        }
+        
+        if(dice[i].value == 1)
+        {
+            printf("|       |");
+        }
+        else if(dice[i].value == 2 || dice[i].value == 3)
+        {
+            printf("|     o |");
+        }
+        else if(dice[i].value == 4 || dice[i].value == 5 || dice[i].value == 6)
+        {
+            printf("| o   o |");
+        }
+        
+        if(dice[i].hold)
+        {
+            printf("\33[m");
+        }
+        
+        printf(" ");
+    }
+    
+    printf("\n");
+    
+    for(i = 0; i < 5; i++)
+    {
+        printf(" ");
+        
+        if(dice[i].hold)
+        {
+            printf("\33[31m");
+        }
+        
+        if(dice[i].value == 1 || dice[i].value == 3 || dice[i].value == 5)
+        {
+            printf("|   o   |");
+        }
+        else if(dice[i].value == 2 || dice[i].value == 4)
+        {
+            printf("|       |");
+        }
+        else if(dice[i].value == 6)
+        {
+            printf("| o   o |");
+        }
+        
+        if(dice[i].hold)
+        {
+            printf("\33[m");
+        }
+        
+        printf(" ");
+    }
+    
+    printf("\n");
+    
+    for(i = 0; i < 5; i++)
+    {
+        printf(" ");
+        
+        if(dice[i].hold)
+        {
+            printf("\33[31m");
+        }
+        
+        if(dice[i].value == 1)
+        {
+            printf("|       |");
+        }
+        else if(dice[i].value == 2 || dice[i].value == 3)
+        {
+            printf("| o     |");
+        }
+        else if(dice[i].value == 4 || dice[i].value == 5 || dice[i].value == 6)
+        {
+            printf("| o   o |");
+        }
+        
+        if(dice[i].hold)
+        {
+            printf("\33[m");
+        }
+        
+        printf(" ");
+    }
+    
+    printf("\n");
+    printf("  ");
+    
+    for(i = 0; i < 5; i++)
+    {
+        if(dice[i].hold)
+        {
+            printf("\33[31m");
+        }
+        
+        printf("-------    ");
+        
+        if(dice[i].hold)
+        {
+            printf("\33[m");
+        }
+    }
+    
+    printf("\n");
+    
+    for(i = 0; i < 5; i++)
+    {
+        printf("     ");
+        
+        if(dice[i].hold)
+        {
+            printf("\33[31m");
+        }
+        
+        printf("%c", (97 + i));
+        
+        if(dice[i].hold)
+        {
+            printf("\33[m");
+        }
+        
+        printf("     ");
     }
     
     printf("\n\n");
@@ -771,7 +935,7 @@ play_t makePlay(const char *type, int points, int completed)
 
 void clearScreen(void)
 {
-    printf("\033[2J\033[1;1H");
+    printf("\033[2J\033[1;1H\n");
 }
 
 void test_cases(void)

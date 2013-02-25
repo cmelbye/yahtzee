@@ -37,6 +37,8 @@ void toggleHold(dice_t dice[5], int diceIndex);
 void holdAllDice(dice_t dice[5]);
 int allDiceAreHeld(dice_t dice[5]);
 void printScoreCard(dice_t dice[5], play_t scores[12]);
+void printDualScoreCard(play_t playerOneScores[12], play_t playerTwoScores[12],
+                        int numberOfPlayers);
 void printDice(dice_t dice[5]);
 void initDice(dice_t dice[5]);
 void initScores(play_t scores[12]);
