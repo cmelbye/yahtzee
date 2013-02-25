@@ -30,7 +30,9 @@ int main(void)
     
     printf("\n\n");
     printf(BANNER);
-    printf("\n\n");
+    printf("\n\n\n");
+    
+    printf("   Welcome! :-) It's recommended that your terminal is at least as wide as this.\n\n");
     
     while(numberOfPlayers != 1 && numberOfPlayers != 2)
     {
