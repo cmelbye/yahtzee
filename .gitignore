@@ -18,3 +18,7 @@ DerivedData
 .idea/
 yahtzee_run
 yahtzee_debug
+
+# Makefile
+*.o
+*.d
